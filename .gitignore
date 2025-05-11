@@ -1,6 +1,5 @@
 .qodo
 # .gitignore
-.env
 .py
 .json".venv/" 
 ".venv/" 
