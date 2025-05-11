@@ -39,7 +39,7 @@ AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING")
 ELASTIC_CLOUD_ID = os.getenv("ELASTIC_CLOUD_ID")
 ELASTIC_API_KEY = os.getenv("ELASTIC_API_KEY")
 CONTAINER_NAME = "originals"
-INDEX_NAME = "documentos_a_elegir"
+INDEX_NAME = "azure_doc"
 
 app = Flask(__name__)
 model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -496,7 +496,7 @@ def carregar():
                 "pagines": pagines
             })
         # Guardar resultados como JSON y Parquet
-            docs_to_upload = top_docs[:2]  # Selecciona hasta 2 documentos si hay disponibles
+        docs_to_upload = top_docs[:2]  # Selecciona hasta 2 documentos si hay disponibles
     if docs_to_upload:
         subir_parquet_documento(docs_to_upload, AZURE_CONNECTION_STRING)
     else:
