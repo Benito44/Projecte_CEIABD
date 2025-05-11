@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultats de Cerca</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .contenidor {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+        .resultat-header {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #444;
+        }
+        .resultat-header strong {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📘 Resultats de Cerca</h1>
+
+<div class="controls">
+    <button onclick="canviarDocument(-1)" id="doc-anterior">⬅ Document anterior</button>
+    <button onclick="canviarDocument(1)" id="doc-seguent">Document següent ➡</button>
+</div>
+<div class="controls" style="margin-bottom: 20px;">
+    <button onclick="window.location.href='/'">🔙 Tornar a l'índex</button>
+</div>
+
+<div id="contenidor" class="contenidor">
+    <div class="resultat-header" id="info-doc"></div>
+    <div id="text-pagina" style="white-space: pre-wrap; line-height: 1.5;"></div>
+    <div class="controls">
+        <button onclick="canviarPagina(-1)" id="pag-anterior">⬅ Pàgina anterior</button>
+        <button onclick="canviarPagina(1)" id="pag-seguent">Pàgina següent ➡</button>
+    </div>
+    <p id="pagina-info" style="text-align:center; font-size: 13px; color: #777;"></p>
+</div>
+
+<script>
+const documents = {{ documents | tojson }};
+const paraula = {{ paraula | tojson }};
+let docIndex = 0;
+let pagIndex = 0;
+
+function normalitzar(text) {
+    return text
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // elimina accents
+        .replace(/\s+/g, " ") // espais normals
+        .trim();
+}
+
+function ressaltar(text, paraula) {
+    const regex = new RegExp(`(${paraula})`, "gi");
+    return text.replace(regex, '<span style="background-color: yellow;">$1</span>');
+}
+
+function ressaltarFragment(textOriginal, fragment) {
+    const normalText = normalitzar(textOriginal);
+    const normalFragment = normalitzar(fragment);
+
+    const index = normalText.indexOf(normalFragment);
+    if (index === -1) return textOriginal;
+
+    for (let i = 0; i <= textOriginal.length - fragment.length; i++) {
+        const sub = normalitzar(textOriginal.substring(i, i + fragment.length + 20));
+        if (sub.startsWith(normalFragment)) {
+            const matchOriginal = textOriginal.substring(i, i + fragment.length);
+            const fragmentEscapat = matchOriginal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regexFragment = new RegExp(fragmentEscapat, "g");
+            return textOriginal.replace(regexFragment, `<span style="background: #eef; border-left: 4px solid #3498db; display: inline-block; padding: 2px 4px; font-style: italic;">$&</span>`);
+        }
+    }
+
+    return textOriginal;
+}
+function trobarPaginaAmbFragment(doc) {
+    if (!doc.fragment) return 0;
+    const fragmentCurt = doc.fragment.slice(0, 80);  // només els primers 80 caràcters
+    const normalFragment = normalitzar(fragmentCurt);
+
+    for (let i = 0; i < doc.pagines.length; i++) {
+        const pagina = doc.pagines[i];
+        const normalPag = normalitzar(pagina);
+
+        if (normalPag.includes(normalFragment)) {
+            console.log("Fragment trobat a la pàgina:", i);
+            return i;
+        }
+    }
+
+    console.log("Fragment no trobat. Tornem a la pàgina 0.");
+    return 0;
+}
+
+function mostrarText() {
+    const doc = documents[docIndex];
+    const textOriginal = doc.pagines[pagIndex];
+    let html = textOriginal;
+
+    if (paraula) {
+        html = ressaltar(html, paraula);
+    }
+
+    if (doc.fragment) {
+        html = ressaltarFragment(html, doc.fragment);
+    }
+
+    const textAmbFragment = `
+        <div style="background: #eef; border-left: 4px solid #3498db; padding: 10px; margin-bottom: 10px; font-style: italic;">
+            🔍 Fragment més rellevant:<br>${ressaltar(doc.fragment, paraula)}
+        </div>
+        ${html}
+    `;
+
+    document.getElementById("text-pagina").innerHTML = textAmbFragment;
+
+    document.getElementById("info-doc").innerHTML = `
+        <strong>📁 Resultat #${docIndex + 1}</strong>
+        📄 Arxiu: ${doc.nom}<br>
+        👤 Autor: ${doc.autor}<br>
+        📅 Data de creació: ${doc.data}<br>
+        📝 Tema: ${doc.tema}<br>
+        ⭐ Score: ${doc.score}
+    `;
+
+    document.getElementById("pag-anterior").disabled = pagIndex === 0;
+    document.getElementById("pag-seguent").disabled = pagIndex === doc.pagines.length - 1;
+    document.getElementById("doc-anterior").disabled = docIndex === 0;
+    document.getElementById("doc-seguent").disabled = docIndex === documents.length - 1;
+    document.getElementById("pagina-info").innerText = `Pàgina ${pagIndex + 1} de ${doc.pagines.length}`;
+}
+
+function canviarPagina(d) {
+    pagIndex += d;
+    const total = documents[docIndex].pagines.length;
+    if (pagIndex < 0) pagIndex = 0;
+    if (pagIndex >= total) pagIndex = total - 1;
+    mostrarText();
+}
+
+function canviarDocument(d) {
+    docIndex += d;
+    if (docIndex < 0) docIndex = 0;
+    if (docIndex >= documents.length) docIndex = documents.length - 1;
+    const doc = documents[docIndex];
+    pagIndex = trobarPaginaAmbFragment(doc);
+
+    mostrarText();
+}
+
+window.onload = () => {
+    const doc = documents[docIndex];
+    const paginaAmbFragment = trobarPaginaAmbFragment(doc);
+    pagIndex = paginaAmbFragment;
+    mostrarText();
+};
+
+
+</script>
+
+</body>
+</html>
