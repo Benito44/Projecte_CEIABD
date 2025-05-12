@@ -1,3 +1,7 @@
+
+![Analisis de Documents ](https://github.com/user-attachments/assets/68570cc1-3d4d-488c-864e-c8a9791ebfc1)
+
+
 # 🧠 Inteligencia Artificial y Procesamiento del Lenguaje Natural
 
 ## 📚 Modelos de lenguaje y embeddings
