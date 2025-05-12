@@ -1,67 +1,68 @@
-# 🧠 Inteligencia Artificial y Procesamiento del Lenguaje Natural
+# 🧠 Intel·ligència Artificial i Processament del Llenguatge Natural
 
-## 📚 Modelos de lenguaje y embeddings
+## 📚 Models de llenguatge i embeddings
 
-- Uso de `SentenceTransformer` con el modelo `all-MiniLM-L6-v2` para generar vectores semánticos del contenido textual.
-- Cálculo de similitud semántica mediante:
+- Ús de `SentenceTransformer` amb el model `all-MiniLM-L6-v2` per generar vectors semàntics del contingut textual.
+- Càlcul de similitud semàntica mitjançant:
   - `cosine_similarity` de `sklearn.metrics.pairwise`.
   - `util.cos_sim` de `sentence_transformers.util`.
 
-## 🧠 Procesamiento del lenguaje con spaCy
+## 🧠 Processament del llenguatge amb spaCy
 
-- Análisis lingüístico usando el modelo `es_core_news_sm` para:
-  - **Lematización**.
-  - **Filtrado de palabras clave**, conservando:
-    - Sustantivos
-    - Nombres propios
-    - Verbos
-    - Adjetivos
+- Anàlisi lingüística usant el model `es_core_news_sm` per a:
+  - **Lematització**.
+  - **Filtrat de paraules clau**, conservant:
+    - Substantius
+    - Noms propis
+    - Verbs
+    - Adjectius
 
-# 🔍 Búsqueda Semántica
+# 🔍 Cerca Semàntica
 
-- Combinación de dos estrategias:
-  - `knn` sobre embeddings para búsqueda por significado.
-  - `match` para coincidencia textual tradicional.
-- Extracción del **fragmento más relevante** basado en la similitud entre fragmentos del documento y la consulta del usuario.
+- Combinació de dues estratègies:
+  - `knn` sobre embeddings per cercar per significat.
+  - `match` per a coincidència textual tradicional.
+- Extracció del **fragment més rellevant** basat en la similitud entre fragments del document i la consulta de lusuari.
 
-# 🗃️ Big Data y Tecnologías de Almacenamiento / Indexación
+# 🗃️ Big Data i Tecnologies d'Emmagatzematge / Indexació
 
-## ☁️ Azure Blob Storage
 
-- Carga y descarga de archivos desde contenedores en la nube.
-- Uso de:
-  - **Metadatos personalizados**
-  - **Generación de URLs SAS** (Shared Access Signature) para compartir archivos de forma segura.
 
-## 📦 Elasticsearch (Cloud)
+## &#9729;&#65039; Azure Blob Storage 
 
-- Creación de un índice **vectorial híbrido** con:
-  - Campos `dense_vector` para embeddings semánticos.
-  - Campos `text`, `keyword`, `date` para búsquedas estructuradas.
-- Configuración de un **analyzer personalizado** con eliminación de acentos (ideal para textos en español).
+- Càrrega i descàrrega d'arxius des de contenidors [al | en el] núvol.
+- Ús de: 
+- ** Metadades personalitzades** 
+- ** Generació d'URLs SAS** (Shared Access Signature) per compartir [arxius | arxivaments] de forma segura. 
 
-## 📑 Documentos procesados
+## &#128230; Elasticsearch (Cloud) 
 
-| Formato | Herramientas utilizadas                          |
-|---------|--------------------------------------------------|
-| `.docx` | `python-docx`, `docx.core_properties`            |
-| `.pdf`  | `pdfplumber`, `PyPDF2` (`pypdf`)                 |
-| `.xls`  | `olefile` para extracción de metadatos           |
+- Creació d'un índex ** vectorial híbrid** amb: 
+- [Camps | Campos] 'donin-se_vector' per a *embeddings semàntics.
+- [Camps | Campos] 'text', '*keyword', '[dona't | dati]' per a [cerques | recerques] estructurades.
+- Configuració d'un ** *analyzer personalitzat** amb eliminació d'accents (ideal per a textos en espanyol). 
 
-## 📈 Almacenamiento estructurado (Parquet)
+## &#128209; Documents processats 
 
-- Conversión de resultados a `DataFrame` con `pandas`.
-- Guardado como archivo `.parquet` (formato columnar optimizado).
-- Subida del archivo final a **Azure Blob Storage** con estructura de carpetas organizadas por **fecha**.
+| Format | Eines utilitzades | 
+|---------|--------------------------------------------------| 
+| '.docx' | '*python-*docx', 'docx.core_properties' | 
+| <ABPQOPSTTUR>.pdf' | '*pdfplumber', 'PyPDF2' ('*pypdf') | 
+| '.xls' | '*olefile' per a extracció de metadades | 
 
-# 🧩 Funcionalidades Clave del Sistema
+## &#128200; Emmagatzemament estructurat (Parquet) 
 
-| Funcionalidad                         | Tecnología utilizada                       |
-|--------------------------------------|--------------------------------------------|
-| Generación de embeddings semánticos  | `SentenceTransformer`                      |
-| Procesamiento de palabras clave NLP  | `spaCy` (`es_core_news_sm`)                |
-| Búsqueda semántica y textual         | `Elasticsearch` (cloud, vector + match)    |
-| Almacenamiento de archivos/resultados| Azure Blob Storage, formato `.parquet`     |
-| Extracción de texto de documentos    | `python-docx`, `pdfplumber`, `pypdf`, `openpyxl` |
-| Extracción de metadatos de documentos| `docx.core_properties`, `olefile`, metadatos de Azure Blob |
+- Conversió de resultats a 'DataFrame' amb '[colles | pandes]'.
+- [Guardat | Guardado] com a [arxiu | arxivament] '.parquet' (format columnar optimitzat).
+- [Pujada | Puja | Ascensió | Pujament] [de l'arxiu | de l'arxivament] final a ** Azure Blob Storage** amb estructura de carpetes organitzades per ** data**. 
 
+# &#129513; Funcionalidades [Clave | Clau | Clavi] del Sistema 
+
+| Funcionalitat | Tecnologia utilitzada | 
+|--------------------------------------|--------------------------------------------| 
+| Generació de *embeddings semàntics | 'SentenceTransformer' | 
+| Processament de paraules clau NLP | '*spaCy' ('és_Core_news_sm') | 
+| [Cerca | Recerca] semàntica i textual | 'Elasticsearch' (*cloud, vector + matx) | 
+| [Estoc | Emmagatzematge] [d'arxius | d'arxivaments]/resultats| Azure Blob Storage, format '.parquet' | 
+| Extracció de text de documents | '*python-*docx', '*pdfplumber', '*pypdf', '*openpyxl' | 
+| Extracció de metadades de documents| 'docx.core_properties', '*olefile', metadades d'Azure Blob | 
