@@ -67,5 +67,5 @@
 | Cerca semàntica i textual         | `Elasticsearch` (cloud, vector + match)      |
 | Emmagatzematge d’arxius/resultats | Azure Blob Storage, format `.parquet`        |
 | Extracció de text de documents     | `python-docx`, `pdfplumber`, `pypdf`, `openpyxl` |
-| Extracció de metadades             | `docx.core_properties`, `olefile`, metadades d’Azure Blob |
+| Extracció de metadades             | `docx.core_properties`, metadades d’Azure Blob |
 
