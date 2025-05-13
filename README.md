@@ -1,5 +1,6 @@
 
-![Analisis de Documents ](https://github.com/user-attachments/assets/68570cc1-3d4d-488c-864e-c8a9791ebfc1)
+![Doc Analitic](https://github.com/user-attachments/assets/f44da9a5-e70e-4c35-9438-feefb3122ba1)
+
 
 
 # 🧠 Intel·ligència Artificial i Processament del Llenguatge Natural
