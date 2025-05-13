@@ -1,5 +1,6 @@
 
-![Doc Analitic](https://github.com/user-attachments/assets/f44da9a5-e70e-4c35-9438-feefb3122ba1)
+
+![Doc Analitic](https://github.com/user-attachments/assets/80a71f49-11e0-46aa-95b4-49949cc2a93a)
 
 
 
