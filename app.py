@@ -153,7 +153,7 @@ def executar_consulta(embedding, text, filtres, paraula):
             print("👤 Autor:", hit['_source'].get("autor", "Desconegut"))
             print("📅 Data de creació:", hit['_source'].get("data_creacio", "Desconeguda"))
             print("📝 Tema:", hit['_source'].get("tema", "Desconegut"))
-            print("⭐ Score:", round(hit['_score'], 2))
+            print("⭐ Puntuació:", round(hit['_score'], 2))
             print("🧠 Fragment més rellevant:", fragment)
             hit["_source"]["fragment"] = fragment
             unics[doc_id] = hit
