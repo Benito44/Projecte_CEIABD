@@ -97,6 +97,29 @@ def indexar_documents():
     if docs:
         print(f"✅ {len(docs)} documents indexats.")
         helpers.bulk(es, docs)
+        
+def sincronitzar_index():
+    # Obtenir tots els blobs actuals d'Azure
+    noms_blobs_azure = set(blob.name for blob in container_client.list_blobs())
+
+    # Obtenir tots els documents indexats a Elasticsearch
+    query = {"query": {"match_all": {}}}
+    resultats = helpers.scan(es, index=INDEX_NAME, query=query)
+    noms_indexats = set()
+    docs_a_eliminar = []
+
+    for doc in resultats:
+        doc_id = doc["_id"]
+        noms_indexats.add(doc_id)
+        if doc_id not in noms_blobs_azure:
+            docs_a_eliminar.append({"_op_type": "delete", "_index": INDEX_NAME, "_id": doc_id})
+            print(f"🗑️ Marcat per eliminar de l'índex: {doc_id}")
+
+    if docs_a_eliminar:
+        helpers.bulk(es, docs_a_eliminar)
+        print(f"✅ {len(docs_a_eliminar)} documents eliminats de l'índex.")
+    else:
+        print("✅ No cal eliminar documents. L'índex està sincronitzat.")
 
 def executar_consulta(embedding, text, filtres, paraula):
     print("🔍 Executant consulta amb filtres:", json.dumps(filtres, indent=2, ensure_ascii=False))
@@ -164,6 +187,22 @@ def subir_parquet_documento(documentos):
 @app.route("/")
 def index():
     return render_template("index.html")
+@app.route("/gestio", methods=["GET", "POST"])
+def gestio_documents():
+    missatge = ""
+    if request.method == "POST":
+        fitxer_a_esborrar = request.form.get("fitxer_a_esborrar")
+        if fitxer_a_esborrar:
+            try:
+                container_client.delete_blob(fitxer_a_esborrar)
+                es.delete(index=INDEX_NAME, id=fitxer_a_esborrar, ignore=[404])
+                missatge = f"✅ Fitxer '{fitxer_a_esborrar}' eliminat correctament."
+            except Exception as e:
+                missatge = f"❌ Error eliminant el fitxer: {str(e)}"
+
+    # Llistar fitxers actuals
+    fitxers = [blob.name for blob in container_client.list_blobs()]
+    return render_template("gestio.html", fitxers=fitxers, missatge=missatge)
 
 @app.route("/carregar", methods=["POST"])
 def carregar():
@@ -200,6 +239,7 @@ def carregar():
         container_client.upload_blob(name=nom_fitxer, data=blob_data, overwrite=True, metadata={"creador": creador, "data_creacio": data, "tema": tema})
         print(f"✅ Fitxer '{nom_fitxer}' pujat amb metadades.")
     crear_indice()
+    sincronitzar_index() 
     indexar_documents()
     top_docs = []
     if paraula or filtres:

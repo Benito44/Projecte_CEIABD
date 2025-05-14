@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Documentos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
+    }
+    .contenidor {
+      max-width: 700px;
+      margin: auto;
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid #ccc;
+    }
+    form {
+      display: inline;
+    }
+    button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #c82333;
+    }
+    .missatge {
+      color: green;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .index {
+      background-color: #3498db;
+      color: white;
+      align-items: center;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="contenidor">
+    <h2>Gestión de Documentos en Azure</h2>
+
+    {% if missatge %}
+      <p class="missatge">{{ missatge }}</p>
+    {% endif %}
+
+    {% if fitxers %}
+      <ul>
+        {% for fitxer in fitxers %}
+          <li>
+            {{ fitxer }}
+            <form method="POST" action="/gestio">
+              <input type="hidden" name="fitxer_a_esborrar" value="{{ fitxer }}">
+              <button type="submit">Eliminar</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+        <div class="controls" style="margin-bottom: 20px;">
+          <button class="index" onclick="window.location.href='/'">🔙 Tornar a l'índex</button>
+        </div>
+    {% else %}
+      <p>No hay documentos en el contenedor.</p>
+    {% endif %}
+  </div>
+
+</body>
+</html>

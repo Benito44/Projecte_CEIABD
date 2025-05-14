@@ -57,13 +57,16 @@
 
   <form action="/carregar" method="POST" enctype="multipart/form-data">
 
-    <h2>Subir documentos y completar formulario</h2>
+    <h2>Pujar documents i completar formulari</h2>
     {% if missatge %}
       <p style="color: red;">{{ missatge }}</p>
     {% endif %}
 
-    <label for="fitxers">Seleccionar documentos (PDF, Word, Excel):</label>
-    <input type="file" id="fitxers" name="fitxers" multiple>
+    <label for="fitxers">Seleccionar documents (PDF, Word):</label>
+    <input type="file" id="fitxers" name="fitxers" accept=".pdf,.docx">
+      <a href="/gestio">
+        <button type="button" style="background-color:#007bff;">Gestionar documentos</button>
+      </a>
 
     <label for="paraula">¿Qué palabra estás buscando?</label>
     <input type="text" id="paraula" name="paraula" required>
