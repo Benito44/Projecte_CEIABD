@@ -58,6 +58,9 @@
   <form action="/carregar" method="POST" enctype="multipart/form-data">
 
     <h2>Subir documentos y completar formulario</h2>
+    {% if missatge %}
+      <p style="color: red;">{{ missatge }}</p>
+    {% endif %}
 
     <label for="fitxers">Seleccionar documentos (PDF, Word, Excel):</label>
     <input type="file" id="fitxers" name="fitxers" multiple>

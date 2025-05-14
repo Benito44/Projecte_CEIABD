@@ -28,6 +28,9 @@ nlp = spacy.load("es_core_news_sm")
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
 container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 es = Elasticsearch(cloud_id=ELASTIC_CLOUD_ID, api_key=ELASTIC_API_KEY)
+print("🔗 Connexió amb Elasticsearch:")
+print("Cloud ID:", ELASTIC_CLOUD_ID)
+print("API Key (parcial):", ELASTIC_API_KEY[:5] + "..." + ELASTIC_API_KEY[-5:])
 
 # Utils
 
@@ -59,6 +62,7 @@ def trobar_fragment(text, consulta):
 
 def crear_indice():
     if not es.indices.exists(index=INDEX_NAME):
+        print(f"🧱 Creant índex nou: {INDEX_NAME}")
         es.indices.create(index=INDEX_NAME, body={
             "settings": {"analysis": {"analyzer": {"custom_analyzer": {"type": "custom", "tokenizer": "standard", "filter": ["lowercase", "asciifolding"]}}}},
             "mappings": {"properties": {
@@ -70,11 +74,14 @@ def crear_indice():
                 "tema": {"type": "keyword"}
             }}
         })
+    else:
+        print(f"ℹ️ L'índex {INDEX_NAME} ja existeix.")
 
 def indexar_documents():
     docs = []
     for blob in container_client.list_blobs():
         if blob.name.endswith((".docx", ".pdf")):
+            print(f"📄 Indexant document: {blob.name}")
             blob_data = container_client.get_blob_client(blob).download_blob().readall()
             text = extraer_texto_docx(blob_data) if blob.name.endswith(".docx") else extraer_texto_pdf(blob_data)
             metadata = container_client.get_blob_client(blob).get_blob_properties().metadata
@@ -88,9 +95,11 @@ def indexar_documents():
                 "tema": metadata.get("tema", "Desconegut")
             }})
     if docs:
+        print(f"✅ {len(docs)} documents indexats.")
         helpers.bulk(es, docs)
 
 def executar_consulta(embedding, text, filtres, paraula):
+    print("🔍 Executant consulta amb filtres:", json.dumps(filtres, indent=2, ensure_ascii=False))
     query = {
         "query": {
             "bool": {
@@ -107,10 +116,23 @@ def executar_consulta(embedding, text, filtres, paraula):
     }
     resultats = es.search(index=INDEX_NAME, body=query)
     unics = {}
-    for hit in resultats["hits"]["hits"]:
+    for idx, hit in enumerate(resultats["hits"]["hits"]):
         doc_id = hit["_id"]
         if doc_id not in unics:
-            hit["_source"]["fragment"] = hit.get("highlight", {}).get("contenido", [trobar_fragment(hit["_source"].get("contenido", ""), paraula)])[0]
+            fragment = hit.get("highlight", {}).get("contenido", [])
+            if fragment:
+                fragment = max(fragment, key=len)
+            else:
+                contingut = hit["_source"].get("contenido", "")
+                fragment = trobar_fragment(contingut, paraula)
+            print(f"\n📁 Resultat #{idx + 1}")
+            print("📄 Arxiu:", hit['_source'].get("nombre_archivo", "Desconegut"))
+            print("👤 Autor:", hit['_source'].get("autor", "Desconegut"))
+            print("📅 Data de creació:", hit['_source'].get("data_creacio", "Desconeguda"))
+            print("📝 Tema:", hit['_source'].get("tema", "Desconegut"))
+            print("⭐ Score:", round(hit['_score'], 2))
+            print("🧠 Fragment més rellevant:", fragment)
+            hit["_source"]["fragment"] = fragment
             unics[doc_id] = hit
     return list(unics.values())
 
@@ -134,7 +156,9 @@ def subir_parquet_documento(documentos):
     buffer = io.BytesIO()
     pq.write_table(table, buffer)
     buffer.seek(0)
-    blob_client = blob_service_client.get_blob_client(container="informacion", blob=f"{datetime.now():%Y-%m-%d}/resultats_{datetime.now():%Y%m%d_%H%M%S}.parquet")
+    nom_blob = f"{datetime.now():%Y-%m-%d}/resultats_{datetime.now():%Y%m%d_%H%M%S}.parquet"
+    print(f"✅ Parquet '{nom_blob}' pujat correctament a Azure Blob Storage")
+    blob_client = blob_service_client.get_blob_client(container="informacion", blob=nom_blob)
     blob_client.upload_blob(buffer, overwrite=True, content_settings=ContentSettings(content_type='application/octet-stream'))
 
 @app.route("/")
@@ -155,6 +179,7 @@ def carregar():
             continue
         nom_fitxer = secure_filename(fitxer.filename)
         blob_data = fitxer.read()
+        print(f"\n📦 Fitxer carregat: {nom_fitxer}")
         if nom_fitxer.endswith(".docx"):
             props = Document(BytesIO(blob_data)).core_properties
             creador = props.author or "Desconegut"
@@ -171,7 +196,9 @@ def carregar():
             tema = props.get("/Subject", "Desconegut")
         else:
             creador, data, tema = "Desconegut", datetime.utcnow().isoformat(), "Desconegut"
+        print(f"  - Creador: {creador}\n  - Data: {data}\n  - Tema: {tema}")
         container_client.upload_blob(name=nom_fitxer, data=blob_data, overwrite=True, metadata={"creador": creador, "data_creacio": data, "tema": tema})
+        print(f"✅ Fitxer '{nom_fitxer}' pujat amb metadades.")
     crear_indice()
     indexar_documents()
     top_docs = []
@@ -193,7 +220,11 @@ def carregar():
             })
     if top_docs:
         subir_parquet_documento(top_docs)
-    return render_template("resultat.html", documents=top_docs, paraula=paraula)
+        return render_template("resultat.html", documents=top_docs, paraula=paraula)
+    else:
+        print("⚠️ No s'ha trobat cap document per pujar.")
+        return render_template("index.html", missatge="No s'ha trobat cap resultat.")
 
 if __name__ == "__main__":
     app.run(debug=True)
+
