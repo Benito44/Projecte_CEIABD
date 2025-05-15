@@ -7,7 +7,7 @@
     body {
       font-family: Arial, sans-serif;
       margin: 40px;
-      background-color: #f5f5f5;
+      background-color: #31ebeb;
     }
     form {
       background-color: #fff;
@@ -50,7 +50,30 @@
     }
     button:hover {
       background-color: #218838;
-    }
+    }#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spinner {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #007bff;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
   </style>
 </head>
 <body>
@@ -63,7 +86,7 @@
     {% endif %}
 
     <label for="fitxers">Seleccionar documents (PDF, Word):</label>
-    <input type="file" id="fitxers" name="fitxers" accept=".pdf,.docx">
+    <input type="file" id="fitxers" name="fitxers" multiple accept=".pdf,.docx">
       <a href="/gestio">
         <button type="button" style="background-color:#007bff;">Gestionar documentos</button>
       </a>
@@ -82,6 +105,20 @@
 
     <button type="submit">Cercar</button>
   </form>
+  <div id="loader" style="display:none;">
+  <div class="spinner"></div>
+</div>
+
 
 </body>
 </html>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.querySelector("form");
+  if (form) {
+    form.addEventListener("submit", function() {
+      document.getElementById("loader").style.display = "flex";
+    });
+  }
+});
+</script>

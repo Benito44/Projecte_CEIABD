@@ -18,7 +18,7 @@ AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING")
 ELASTIC_CLOUD_ID = os.getenv("ELASTIC_CLOUD_ID")
 ELASTIC_API_KEY = os.getenv("ELASTIC_API_KEY")
 CONTAINER_NAME = "originals"
-INDEX_NAME = "azure_doc"
+INDEX_NAME = "docuents"
 
 app = Flask(__name__)
 model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -71,7 +71,11 @@ def crear_indice():
                 "embedding": {"type": "dense_vector", "dims": 384, "index": True, "similarity": "cosine"},
                 "autor": {"type": "text"},
                 "data_creacio": {"type": "date"},
-                "tema": {"type": "keyword"}
+                "tema": {
+                            "type": "text",
+                            "analyzer": "custom_analyzer"
+                        }
+
             }}
         })
     else:
@@ -212,7 +216,15 @@ def carregar():
     for clau in ["creador", "data", "tema"]:
         val = request.form.get(clau)
         if val:
-            filtres.append({"match": {"autor" if clau == "creador" else clau: val}})
+            if clau == "creador":
+                filtres.append({"match": {"autor": val}})
+            elif clau == "data":
+                filtres.append({"match": {"data_creacio": val}})
+            elif clau == "tema":
+                filtres.append({"match": {"tema": val}})
+            else:
+                filtres.append({"match": {clau: val}})
+
     for fitxer in fitxers:
         if not fitxer.filename:
             continue
